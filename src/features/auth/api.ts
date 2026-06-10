@@ -1,17 +1,10 @@
+import { http } from '@/lib/http'
 import type { LoginCredentials, AuthUser } from './types'
 
-// TODO: substituir pela chamada real à API ASP.NET Core
 export async function login(credentials: LoginCredentials): Promise<AuthUser> {
-  await new Promise((r) => setTimeout(r, 800))
+  return http.post<AuthUser>('/Users/authenticate', credentials)
+}
 
-  if (credentials.email && credentials.password) {
-    return {
-      id: '1',
-      name: 'Usuário Demo',
-      email: credentials.email,
-      token: 'mock-jwt-token',
-    }
-  }
-
-  throw new Error('Credenciais inválidas')
+export async function refreshToken(token: string): Promise<AuthUser> {
+  return http.post<AuthUser>('/Users/refresh-token', { refreshToken: token })
 }

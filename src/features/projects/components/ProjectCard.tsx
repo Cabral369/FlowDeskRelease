@@ -5,6 +5,7 @@ import { PROJECT_STATUS_LABELS } from '../types'
 import type { Project, ProjectStatus } from '../types'
 
 const statusVariant: Record<ProjectStatus, 'default' | 'success' | 'secondary' | 'destructive'> = {
+  planning: 'secondary',
   active: 'default',
   completed: 'success',
   paused: 'secondary',

@@ -5,6 +5,7 @@ import { TASK_PRIORITY_LABELS } from '../types'
 import type { Task, TaskPriority } from '../types'
 
 const priorityVariant: Record<TaskPriority, 'destructive' | 'warning' | 'secondary'> = {
+  critical: 'destructive',
   high: 'destructive',
   medium: 'warning',
   low: 'secondary',

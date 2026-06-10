@@ -7,9 +7,10 @@ import { deleteTask } from '@/features/tasks/api'
 import { TASK_STATUS_LABELS } from '@/features/tasks/types'
 import type { TaskStatus } from '@/features/tasks/types'
 
-const columns: { status: TaskStatus; variant: 'secondary' | 'default' | 'success' }[] = [
+const columns: { status: TaskStatus; variant: 'secondary' | 'default' | 'warning' | 'success' }[] = [
   { status: 'todo', variant: 'secondary' },
   { status: 'in_progress', variant: 'default' },
+  { status: 'review', variant: 'warning' },
   { status: 'done', variant: 'success' },
 ]
 
@@ -39,7 +40,7 @@ export function TasksPage() {
           <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {columns.map(({ status, variant }) => {
             const columnTasks = tasks.filter((t) => t.status === status)
             return (

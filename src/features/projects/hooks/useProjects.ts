@@ -11,7 +11,9 @@ export function useProjects(status?: ProjectStatus | 'all') {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await getProjects(status)
+      const data = await getProjects({
+        status: status === 'all' || !status ? undefined : status,
+      })
       setProjects(data)
     } catch {
       setError('Erro ao carregar projetos.')

@@ -17,7 +17,6 @@ export function ClientForm({ client, onSuccess, onCancel }: Props) {
     email: client?.email ?? '',
     phone: client?.phone ?? '',
     company: client?.company ?? '',
-    notes: client?.notes ?? '',
   })
 
   function set(field: keyof CreateClientDTO, value: string) {
@@ -88,17 +87,6 @@ export function ClientForm({ client, onSuccess, onCancel }: Props) {
             className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-slate-700 mb-1.5">Observações</label>
-        <textarea
-          value={form.notes}
-          onChange={(e) => set('notes', e.target.value)}
-          rows={3}
-          placeholder="Informações adicionais sobre o cliente..."
-          className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-        />
       </div>
 
       <div className="flex justify-end gap-3 pt-2">

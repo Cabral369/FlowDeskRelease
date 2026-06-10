@@ -1,44 +1,51 @@
-import type { Project, CreateProjectDTO, UpdateProjectDTO } from './types'
-import { mockProjects } from './mock'
+import { http } from '@/lib/http'
+import { ProjectStatusEnum, ProjectStatusFromApi } from '@/lib/enums'
+import type { Project, CreateProjectDTO, UpdateProjectDTO, ProjectStatus } from './types'
 
-// TODO: substituir por chamadas reais à API ASP.NET Core (/api/projects)
-const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms))
+function fromApi(raw: Record<string, unknown>): Project {
+  return {
+    ...raw,
+    status: ProjectStatusFromApi[raw.status as number] ?? 'planning',
+  } as Project
+}
 
-let store: Project[] = [...mockProjects]
-
-export async function getProjects(status?: string): Promise<Project[]> {
-  await delay()
-  if (status && status !== 'all') return store.filter((p) => p.status === status)
-  return [...store]
+export async function getProjects(params?: {
+  clientId?: string
+  searchTerm?: string
+  status?: ProjectStatus
+  page?: number
+  pageSize?: number
+}): Promise<Project[]> {
+  const raw = await http.get<Record<string, unknown>[]>('/Projects', {
+    ClientId: params?.clientId,
+    SearchTerm: params?.searchTerm,
+    Status: params?.status ? ProjectStatusEnum[params.status] : undefined,
+    Page: params?.page,
+    PageSize: params?.pageSize,
+  })
+  return raw.map(fromApi)
 }
 
 export async function getProject(id: string): Promise<Project> {
-  await delay()
-  const project = store.find((p) => p.id === id)
-  if (!project) throw new Error('Projeto não encontrado')
-  return { ...project }
+  const raw = await http.get<Record<string, unknown>>(`/Projects/${id}`)
+  return fromApi(raw)
 }
 
 export async function createProject(dto: CreateProjectDTO): Promise<Project> {
-  await delay()
-  const newProject: Project = {
-    id: String(Date.now()),
-    workspaceId: 'ws-1',
-    clientName: '',
-    createdAt: new Date().toISOString(),
-    ...dto,
-  }
-  store = [...store, newProject]
-  return newProject
+  const raw = await http.post<Record<string, unknown>>('/Projects', dto)
+  return fromApi(raw)
 }
 
 export async function updateProject({ id, ...dto }: UpdateProjectDTO): Promise<Project> {
-  await delay()
-  store = store.map((p) => (p.id === id ? { ...p, ...dto } : p))
-  return { ...store.find((p) => p.id === id)! }
+  const body = {
+    id,
+    ...dto,
+    status: dto.status ? ProjectStatusEnum[dto.status] : undefined,
+  }
+  const raw = await http.put<Record<string, unknown>>(`/Projects/${id}`, body)
+  return fromApi(raw)
 }
 
 export async function deleteProject(id: string): Promise<void> {
-  await delay()
-  store = store.filter((p) => p.id !== id)
+  return http.delete(`/Projects/${id}`)
 }

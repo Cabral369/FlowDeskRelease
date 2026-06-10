@@ -11,7 +11,7 @@ export function useTasks(projectId?: string) {
     setIsLoading(true)
     setError(null)
     try {
-      const data = await getTasks(projectId)
+      const data = await getTasks({ projectId })
       setTasks(data)
     } catch {
       setError('Erro ao carregar tarefas.')

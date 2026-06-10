@@ -17,20 +17,23 @@ export function useDashboardMetrics() {
   useEffect(() => {
     async function load() {
       setIsLoading(true)
-      const [clients, projects, tasks] = await Promise.all([
-        getClients(),
-        getProjects(),
-        getTasks(),
-      ])
-      setMetrics({
-        totalClients: clients.length,
-        activeProjects: projects.filter((p) => p.status === 'active').length,
-        pendingTasks: tasks.filter((t) => t.status !== 'done').length,
-        expectedRevenue: projects
-          .filter((p) => p.status === 'active')
-          .reduce((sum, p) => sum + (p.estimatedValue ?? 0), 0),
-      })
-      setIsLoading(false)
+      try {
+        const [clients, projects, tasks] = await Promise.all([
+          getClients(),
+          getProjects(),
+          getTasks(),
+        ])
+        setMetrics({
+          totalClients: clients.length,
+          activeProjects: projects.filter((p) => p.status === 'active').length,
+          pendingTasks: tasks.filter((t) => t.status !== 'done').length,
+          expectedRevenue: projects
+            .filter((p) => p.status === 'active')
+            .reduce((sum, p) => sum + (p.estimatedValue ?? 0), 0),
+        })
+      } finally {
+        setIsLoading(false)
+      }
     }
     load()
   }, [])

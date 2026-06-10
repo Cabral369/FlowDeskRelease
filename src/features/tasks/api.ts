@@ -1,40 +1,71 @@
-import type { Task, CreateTaskDTO, UpdateTaskDTO, TaskStatus } from './types'
-import { mockTasks } from './mock'
+import { http } from '@/lib/http'
+import {
+  TaskStatusEnum, TaskStatusFromApi,
+  TaskPriorityEnum, TaskPriorityFromApi,
+} from '@/lib/enums'
+import type { Task, CreateTaskDTO, UpdateTaskDTO, TaskStatus, TaskPriority } from './types'
 
-// TODO: substituir por chamadas reais à API ASP.NET Core (/api/tasks)
-const delay = (ms = 400) => new Promise((r) => setTimeout(r, ms))
+function fromApi(raw: Record<string, unknown>): Task {
+  return {
+    ...raw,
+    status: TaskStatusFromApi[raw.status as number] ?? 'todo',
+    priority: TaskPriorityFromApi[raw.priority as number] ?? 'medium',
+  } as Task
+}
 
-let store: Task[] = [...mockTasks]
+export async function getTasks(params?: {
+  projectId?: string
+  searchTerm?: string
+  status?: TaskStatus
+  priority?: TaskPriority
+  page?: number
+  pageSize?: number
+}): Promise<Task[]> {
+  const raw = await http.get<Record<string, unknown>[]>('/Tasks', {
+    ProjectId: params?.projectId,
+    SearchTerm: params?.searchTerm,
+    Status: params?.status ? TaskStatusEnum[params.status] : undefined,
+    Priority: params?.priority ? TaskPriorityEnum[params.priority] : undefined,
+    Page: params?.page,
+    PageSize: params?.pageSize,
+  })
+  return raw.map(fromApi)
+}
 
-export async function getTasks(projectId?: string): Promise<Task[]> {
-  await delay()
-  if (projectId) return store.filter((t) => t.projectId === projectId)
-  return [...store]
+export async function getTask(id: string): Promise<Task> {
+  const raw = await http.get<Record<string, unknown>>(`/Tasks/${id}`)
+  return fromApi(raw)
 }
 
 export async function createTask(dto: CreateTaskDTO): Promise<Task> {
-  await delay()
-  const newTask: Task = {
-    id: String(Date.now()),
-    projectName: '',
-    createdAt: new Date().toISOString(),
+  const body = {
     ...dto,
+    status: TaskStatusEnum[dto.status],
+    priority: TaskPriorityEnum[dto.priority],
   }
-  store = [...store, newTask]
-  return newTask
+  const raw = await http.post<Record<string, unknown>>('/Tasks', body)
+  return fromApi(raw)
 }
 
 export async function updateTask({ id, ...dto }: UpdateTaskDTO): Promise<Task> {
-  await delay()
-  store = store.map((t) => (t.id === id ? { ...t, ...dto } : t))
-  return { ...store.find((t) => t.id === id)! }
+  const body = {
+    id,
+    ...dto,
+    status: dto.status ? TaskStatusEnum[dto.status] : undefined,
+    priority: dto.priority ? TaskPriorityEnum[dto.priority] : undefined,
+  }
+  const raw = await http.put<Record<string, unknown>>(`/Tasks/${id}`, body)
+  return fromApi(raw)
 }
 
 export async function updateTaskStatus(id: string, status: TaskStatus): Promise<Task> {
-  return updateTask({ id, status })
+  const raw = await http.patch<Record<string, unknown>>(`/Tasks/${id}/status`, {
+    id,
+    status: TaskStatusEnum[status],
+  })
+  return fromApi(raw)
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  await delay()
-  store = store.filter((t) => t.id !== id)
+  return http.delete(`/Tasks/${id}`)
 }
