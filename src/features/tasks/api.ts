@@ -21,7 +21,7 @@ export async function getTasks(params?: {
   page?: number
   pageSize?: number
 }): Promise<Task[]> {
-  const raw = await http.get<Record<string, unknown>[]>('/Tasks', {
+  const raw = await http.get<Record<string, unknown>[] | { tasks?: Record<string, unknown>[] }>('/Tasks', {
     ProjectId: params?.projectId,
     SearchTerm: params?.searchTerm,
     Status: params?.status ? TaskStatusEnum[params.status] : undefined,
@@ -29,7 +29,8 @@ export async function getTasks(params?: {
     Page: params?.page,
     PageSize: params?.pageSize,
   })
-  return raw.map(fromApi)
+  const list = Array.isArray(raw) ? raw : (raw.tasks ?? [])
+  return list.map(fromApi)
 }
 
 export async function getTask(id: string): Promise<Task> {

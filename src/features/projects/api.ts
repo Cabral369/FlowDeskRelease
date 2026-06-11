@@ -9,6 +9,10 @@ function fromApi(raw: Record<string, unknown>): Project {
   } as Project
 }
 
+function toPagedArray(data: Record<string, unknown>[] | { projects?: Record<string, unknown>[] }): Record<string, unknown>[] {
+  return Array.isArray(data) ? data : (data.projects ?? [])
+}
+
 export async function getProjects(params?: {
   clientId?: string
   searchTerm?: string
@@ -16,14 +20,14 @@ export async function getProjects(params?: {
   page?: number
   pageSize?: number
 }): Promise<Project[]> {
-  const raw = await http.get<Record<string, unknown>[]>('/Projects', {
-    ClientId: params?.clientId,
+  const raw = await http.get<Record<string, unknown>[] | { projects?: Record<string, unknown>[] }>('/Projects', {
     SearchTerm: params?.searchTerm,
     Status: params?.status ? ProjectStatusEnum[params.status] : undefined,
+    ClientId: params?.clientId,
     Page: params?.page,
     PageSize: params?.pageSize,
   })
-  return raw.map(fromApi)
+  return toPagedArray(raw).map(fromApi)
 }
 
 export async function getProject(id: string): Promise<Project> {
