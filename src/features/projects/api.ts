@@ -1,4 +1,5 @@
 import { http } from '@/lib/http'
+import { WORKSPACE_ID } from '@/lib/constants'
 import { ProjectStatusEnum, ProjectStatusFromApi } from '@/lib/enums'
 import type { Project, CreateProjectDTO, UpdateProjectDTO, ProjectStatus } from './types'
 
@@ -21,6 +22,7 @@ export async function getProjects(params?: {
   pageSize?: number
 }): Promise<Project[]> {
   const raw = await http.get<Record<string, unknown>[] | { projects?: Record<string, unknown>[] }>('/Projects', {
+    WorkspaceId: WORKSPACE_ID,
     SearchTerm: params?.searchTerm,
     Status: params?.status ? ProjectStatusEnum[params.status] : undefined,
     ClientId: params?.clientId,
@@ -36,13 +38,21 @@ export async function getProject(id: string): Promise<Project> {
 }
 
 export async function createProject(dto: CreateProjectDTO): Promise<Project> {
-  const raw = await http.post<Record<string, unknown>>('/Projects', dto)
+  const raw = await http.post<Record<string, unknown>>('/Projects', {
+    ...dto,
+    workspaceId: WORKSPACE_ID,
+    status: dto.status ? ProjectStatusEnum[dto.status] : undefined,
+    startDate: dto.startDate || undefined,
+    dueDate: dto.dueDate || undefined,
+    description: dto.description || undefined,
+  })
   return fromApi(raw)
 }
 
 export async function updateProject({ id, ...dto }: UpdateProjectDTO): Promise<Project> {
   const body = {
     id,
+    workspaceId: WORKSPACE_ID,
     ...dto,
     status: dto.status ? ProjectStatusEnum[dto.status] : undefined,
   }

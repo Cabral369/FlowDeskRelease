@@ -1,4 +1,5 @@
 import { http } from '@/lib/http'
+import { WORKSPACE_ID } from '@/lib/constants'
 import {
   TaskStatusEnum, TaskStatusFromApi,
   TaskPriorityEnum, TaskPriorityFromApi,
@@ -22,6 +23,7 @@ export async function getTasks(params?: {
   pageSize?: number
 }): Promise<Task[]> {
   const raw = await http.get<Record<string, unknown>[] | { tasks?: Record<string, unknown>[] }>('/Tasks', {
+    WorkspaceId: WORKSPACE_ID,
     ProjectId: params?.projectId,
     SearchTerm: params?.searchTerm,
     Status: params?.status ? TaskStatusEnum[params.status] : undefined,
@@ -41,6 +43,7 @@ export async function getTask(id: string): Promise<Task> {
 export async function createTask(dto: CreateTaskDTO): Promise<Task> {
   const body = {
     ...dto,
+    workspaceId: WORKSPACE_ID,
     status: TaskStatusEnum[dto.status],
     priority: TaskPriorityEnum[dto.priority],
   }
@@ -51,6 +54,7 @@ export async function createTask(dto: CreateTaskDTO): Promise<Task> {
 export async function updateTask({ id, ...dto }: UpdateTaskDTO): Promise<Task> {
   const body = {
     id,
+    workspaceId: WORKSPACE_ID,
     ...dto,
     status: dto.status ? TaskStatusEnum[dto.status] : undefined,
     priority: dto.priority ? TaskPriorityEnum[dto.priority] : undefined,

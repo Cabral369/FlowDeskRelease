@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Plus, FolderKanban } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ProjectCard } from '@/features/projects/components/ProjectCard'
+import { ProjectForm } from '@/features/projects/components/ProjectForm'
 import { useProjects } from '@/features/projects/hooks/useProjects'
 import { deleteProject } from '@/features/projects/api'
 import { PROJECT_STATUS_LABELS } from '@/features/projects/types'
@@ -20,14 +21,32 @@ const filters: { label: string; value: Filter }[] = [
 export function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState<Filter>('all')
   const { projects, isLoading, refetch } = useProjects(activeFilter)
+  const [editing, setEditing] = useState<Project | null>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
   async function handleDelete(id: string) {
     await deleteProject(id)
     refetch()
   }
 
-  function handleEdit(_project: Project) {
-    // TODO: abrir modal/form de edição
+  function openEdit(project: Project) {
+    setEditing(project)
+    setIsFormOpen(true)
+  }
+
+  function openCreate() {
+    setEditing(null)
+    setIsFormOpen(true)
+  }
+
+  function closeForm() {
+    setIsFormOpen(false)
+    setEditing(null)
+  }
+
+  function onFormSuccess() {
+    closeForm()
+    refetch()
   }
 
   return (
@@ -37,11 +56,20 @@ export function ProjectsPage() {
           <h1 className="text-2xl font-bold text-slate-900">Projetos</h1>
           <p className="text-slate-500 text-sm mt-1">Acompanhe o andamento dos seus projetos</p>
         </div>
-        <Button>
+        <Button onClick={openCreate}>
           <Plus className="w-4 h-4" />
           Novo projeto
         </Button>
       </div>
+
+      {isFormOpen && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-base font-semibold text-slate-900 mb-4">
+            {editing ? 'Editar projeto' : 'Novo projeto'}
+          </h2>
+          <ProjectForm project={editing ?? undefined} onSuccess={onFormSuccess} onCancel={closeForm} />
+        </div>
+      )}
 
       <div className="flex items-center gap-2 flex-wrap">
         {filters.map(({ label, value }) => (
@@ -75,7 +103,7 @@ export function ProjectsPage() {
             <ProjectCard
               key={project.id}
               project={project}
-              onEdit={handleEdit}
+              onEdit={openEdit}
               onDelete={handleDelete}
             />
           ))}
