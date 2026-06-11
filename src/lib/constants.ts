@@ -1,2 +1,7 @@
+// Preenchido em runtime por getOrCreateWorkspaceId() antes do app renderizar
 // TODO: substituir pelo workspaceId real vindo do contexto de autenticação
-export const WORKSPACE_ID = '29b55bb4-7847-44a5-801f-62c382a35156'
+export let WORKSPACE_ID = ''
+
+export function setWorkspaceId(id: string) {
+  WORKSPACE_ID = id
+}
