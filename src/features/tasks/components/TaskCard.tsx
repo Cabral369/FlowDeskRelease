@@ -1,4 +1,4 @@
-import { Calendar, Trash2 } from 'lucide-react'
+import { Calendar, Pencil, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { TASK_PRIORITY_LABELS } from '../types'
@@ -13,10 +13,11 @@ const priorityVariant: Record<TaskPriority, 'destructive' | 'warning' | 'seconda
 
 interface Props {
   task: Task
+  onEdit?: (task: Task) => void
   onDelete: (id: string) => void
 }
 
-export function TaskCard({ task, onDelete }: Props) {
+export function TaskCard({ task, onEdit, onDelete }: Props) {
   const dueDate = task.dueDate
     ? new Date(task.dueDate).toLocaleDateString('pt-BR')
     : null
@@ -41,14 +42,26 @@ export function TaskCard({ task, onDelete }: Props) {
         ) : (
           <span />
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50"
-          onClick={() => onDelete(task.id)}
-        >
-          <Trash2 className="w-3 h-3" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {onEdit && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 text-slate-400 hover:text-slate-600"
+              onClick={() => onEdit(task)}
+            >
+              <Pencil className="w-3 h-3" />
+            </Button>
+          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 text-red-400 hover:text-red-600 hover:bg-red-50"
+            onClick={() => onDelete(task.id)}
+          >
+            <Trash2 className="w-3 h-3" />
+          </Button>
+        </div>
       </div>
     </div>
   )

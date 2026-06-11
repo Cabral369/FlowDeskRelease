@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { getClients } from '@/features/clients/api'
 import { getProjects } from '@/features/projects/api'
 import { getTasks } from '@/features/tasks/api'
+import type { Project } from '@/features/projects/types'
+import type { Task } from '@/features/tasks/types'
 
 export interface DashboardMetrics {
   totalClients: number
@@ -12,6 +14,8 @@ export interface DashboardMetrics {
 
 export function useDashboardMetrics() {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
+  const [recentProjects, setRecentProjects] = useState<Project[]>([])
+  const [upcomingTasks, setUpcomingTasks] = useState<Task[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -23,6 +27,7 @@ export function useDashboardMetrics() {
           getProjects(),
           getTasks(),
         ])
+
         setMetrics({
           totalClients: clients.length,
           activeProjects: projects.filter((p) => p.status === 'active').length,
@@ -31,6 +36,21 @@ export function useDashboardMetrics() {
             .filter((p) => p.status === 'active')
             .reduce((sum, p) => sum + (p.estimatedValue ?? 0), 0),
         })
+
+        // 5 projetos mais recentes (por createdAt desc)
+        const sorted = [...projects].sort((a, b) => {
+          const da = a.createdAt ? new Date(a.createdAt).getTime() : 0
+          const db = b.createdAt ? new Date(b.createdAt).getTime() : 0
+          return db - da
+        })
+        setRecentProjects(sorted.slice(0, 5))
+
+        // Tarefas não concluídas com prazo, ordenadas por dueDate
+        const upcoming = tasks
+          .filter((t) => t.status !== 'done' && t.dueDate)
+          .sort((a, b) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
+          .slice(0, 5)
+        setUpcomingTasks(upcoming)
       } finally {
         setIsLoading(false)
       }
@@ -38,5 +58,5 @@ export function useDashboardMetrics() {
     load()
   }, [])
 
-  return { metrics, isLoading }
+  return { metrics, recentProjects, upcomingTasks, isLoading }
 }

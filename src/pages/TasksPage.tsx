@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { Plus, CheckSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { TaskCard } from '@/features/tasks/components/TaskCard'
+import { TaskForm } from '@/features/tasks/components/TaskForm'
 import { useTasks } from '@/features/tasks/hooks/useTasks'
 import { deleteTask } from '@/features/tasks/api'
 import { TASK_STATUS_LABELS } from '@/features/tasks/types'
-import type { TaskStatus } from '@/features/tasks/types'
+import type { Task, TaskStatus } from '@/features/tasks/types'
 
 const columns: { status: TaskStatus; variant: 'secondary' | 'default' | 'warning' | 'success' }[] = [
   { status: 'todo', variant: 'secondary' },
@@ -16,9 +18,31 @@ const columns: { status: TaskStatus; variant: 'secondary' | 'default' | 'warning
 
 export function TasksPage() {
   const { tasks, isLoading, refetch } = useTasks()
+  const [editing, setEditing] = useState<Task | null>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false)
 
   async function handleDelete(id: string) {
     await deleteTask(id)
+    refetch()
+  }
+
+  function openCreate() {
+    setEditing(null)
+    setIsFormOpen(true)
+  }
+
+  function openEdit(task: Task) {
+    setEditing(task)
+    setIsFormOpen(true)
+  }
+
+  function closeForm() {
+    setIsFormOpen(false)
+    setEditing(null)
+  }
+
+  function onFormSuccess() {
+    closeForm()
     refetch()
   }
 
@@ -29,11 +53,20 @@ export function TasksPage() {
           <h1 className="text-2xl font-bold text-slate-900">Tarefas</h1>
           <p className="text-slate-500 text-sm mt-1">Organize as atividades dos seus projetos</p>
         </div>
-        <Button>
+        <Button onClick={openCreate}>
           <Plus className="w-4 h-4" />
           Nova tarefa
         </Button>
       </div>
+
+      {isFormOpen && (
+        <div className="bg-white rounded-xl border border-slate-200 p-6">
+          <h2 className="text-base font-semibold text-slate-900 mb-4">
+            {editing ? 'Editar tarefa' : 'Nova tarefa'}
+          </h2>
+          <TaskForm task={editing ?? undefined} onSuccess={onFormSuccess} onCancel={closeForm} />
+        </div>
+      )}
 
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
@@ -59,7 +92,7 @@ export function TasksPage() {
                     </div>
                   ) : (
                     columnTasks.map((task) => (
-                      <TaskCard key={task.id} task={task} onDelete={handleDelete} />
+                      <TaskCard key={task.id} task={task} onEdit={openEdit} onDelete={handleDelete} />
                     ))
                   )}
                 </div>
