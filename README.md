@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# FlowDesk — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interface web do FlowDesk, micro SaaS B2B para freelancers gerenciarem clientes, projetos, tarefas e faturamento.
 
-Currently, two official plugins are available:
+Construído com React + TypeScript + Vite + Tailwind CSS + shadcn/ui.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Pré-requisitos
 
-## React Compiler
+- [Node.js 18+](https://nodejs.org)
+- Backend FlowDesk rodando em `http://localhost:8080` (ver `FlowDeskBackEnd/README.md`)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Como executar
 
-## Expanding the ESLint configuration
+**1. Suba o backend primeiro:**
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Na pasta FlowDeskBackEnd
+docker compose up -d
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+**2. Instale as dependências e inicie o frontend:**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
+
+Acesse em `http://localhost:5173`.
+
+O Vite proxy já está configurado para redirecionar chamadas `/api/*` para `http://localhost:8080`, sem necessidade de configuração adicional.
+
+## Scripts disponíveis
+
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Inicia o servidor de desenvolvimento |
+| `npm run build` | Gera o build de produção em `dist/` |
+| `npm run preview` | Visualiza o build de produção localmente |
+
+## Funcionalidades
+
+- Dashboard com métricas, projetos recentes e tarefas próximas do prazo
+- Gestão de clientes (criar, editar, excluir)
+- Gestão de projetos com status, valor estimado e filtros
+- Gestão de tarefas em kanban (A fazer, Em andamento, Em revisão, Concluído)
+- Configurações de workspace
+
+## Observações
+
+- Na primeira execução, um workspace é criado automaticamente e salvo no `localStorage`.
+- Autenticação JWT ainda não implementada — será adicionada em versão futura.

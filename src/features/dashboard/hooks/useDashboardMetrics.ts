@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
 import { getClients } from '@/features/clients/api'
 import { getProjects } from '@/features/projects/api'
 import { getTasks } from '@/features/tasks/api'
@@ -13,6 +14,7 @@ export interface DashboardMetrics {
 }
 
 export function useDashboardMetrics() {
+  const location = useLocation()
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
   const [recentProjects, setRecentProjects] = useState<Project[]>([])
   const [upcomingTasks, setUpcomingTasks] = useState<Task[]>([])
@@ -33,7 +35,7 @@ export function useDashboardMetrics() {
           activeProjects: projects.filter((p) => p.status === 'active').length,
           pendingTasks: tasks.filter((t) => t.status !== 'done').length,
           expectedRevenue: projects
-            .filter((p) => p.status === 'active')
+            .filter((p) => p.status === 'active' || p.status === 'completed')
             .reduce((sum, p) => sum + (p.estimatedValue ?? 0), 0),
         })
 
@@ -56,7 +58,7 @@ export function useDashboardMetrics() {
       }
     }
     load()
-  }, [])
+  }, [location.pathname])
 
   return { metrics, recentProjects, upcomingTasks, isLoading }
 }

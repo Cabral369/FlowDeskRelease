@@ -15,6 +15,7 @@ interface Props {
 export function ProjectForm({ project, onSuccess, onCancel }: Props) {
   const isEditing = !!project
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const [clients, setClients] = useState<Client[]>([])
   const [form, setForm] = useState<CreateProjectDTO>({
     clientId: project?.clientId ?? '',
@@ -37,6 +38,7 @@ export function ProjectForm({ project, onSuccess, onCancel }: Props) {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setIsLoading(true)
+    setError('')
     try {
       if (isEditing) {
         await updateProject({ id: project.id, ...form })
@@ -44,6 +46,10 @@ export function ProjectForm({ project, onSuccess, onCancel }: Props) {
         await createProject(form)
       }
       onSuccess()
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erro ao salvar projeto'
+      console.error('createProject error:', msg)
+      setError(msg)
     } finally {
       setIsLoading(false)
     }
@@ -140,6 +146,10 @@ export function ProjectForm({ project, onSuccess, onCancel }: Props) {
           className={inputClass}
         />
       </div>
+
+      {error && (
+        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>
+      )}
 
       <div className="flex justify-end gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>

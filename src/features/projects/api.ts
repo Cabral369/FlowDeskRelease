@@ -55,6 +55,9 @@ export async function updateProject({ id, ...dto }: UpdateProjectDTO): Promise<P
     workspaceId: WORKSPACE_ID,
     ...dto,
     status: dto.status ? ProjectStatusEnum[dto.status] : undefined,
+    startDate: dto.startDate || undefined,
+    dueDate: dto.dueDate || undefined,
+    description: dto.description || undefined,
   }
   const raw = await http.put<Record<string, unknown>>(`/Projects/${id}`, body)
   return fromApi(raw)
